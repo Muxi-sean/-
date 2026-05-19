@@ -8,8 +8,10 @@ RUN sed -i 's|listen = .*|listen = 127.0.0.1:9000|g' /usr/local/etc/php-fpm.d/ww
 
 WORKDIR /app
 
-COPY . /app/
-
+# Copy only the necessary files to avoid recursive symlinks
+COPY public /app/public
+COPY api /app/api
+COPY start.sh /app/start.sh
 COPY nginx.conf /etc/nginx/http.d/default.conf
 
 RUN chmod +x /app/start.sh
