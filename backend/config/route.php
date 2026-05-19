@@ -1,8 +1,9 @@
 <?php
-use think\facade\Route;
-
-Route::post('api/trade/search', 'Trade/search');
-Route::get('api/trade/dicts', 'Trade/dicts');
-Route::get('api/health', function() {
-    return json(['status' => 'ok']);
-});
+return [
+    // 路由配置
+    'url_lazy_route'        => false,
+    'url_route_must'        => false,
+    'route_annotation'      => false,
+    'controller_suffix'     => false,
+    'controller_auto_search' => true,
+];
