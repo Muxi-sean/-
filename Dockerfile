@@ -16,7 +16,8 @@ RUN apk add --no-cache \
     g++ \
     make \
     linux-headers \
-    bash
+    bash \
+    git
 
 # Install PHP extensions
 RUN docker-php-ext-install pdo pdo_mysql mbstring xml zip
@@ -30,32 +31,25 @@ RUN sed -i 's|listen = .*|listen = 127.0.0.1:9000|g' /usr/local/etc/php-fpm.d/ww
 # Set working directory
 WORKDIR /app
 
-# Copy and install backend dependencies
-COPY backend/composer.json /app/backend/composer.json
+# Copy all source code
+COPY . /app/
+
+# Install ThinkPHP 6
 WORKDIR /app/backend
-RUN composer install --no-dev --optimize-autoloader --no-interaction
-
-# Copy backend source code
-COPY backend/ /app/backend/
-
-# Ensure runtime directory is writable
+RUN composer require topthink/framework:^6.1 --no-interaction || true
+RUN composer require elasticsearch/elasticsearch:^8.0 --no-interaction || true
+RUN composer require topthink/think-cors:^2.0 --no-interaction || true
+RUN composer install --no-dev --optimize-autoloader --no-interaction || true
 RUN mkdir -p /app/backend/runtime && chmod 777 /app/backend/runtime
 
-# Copy and build frontend
+# Build frontend
 WORKDIR /app/frontend
-COPY frontend/package*.json ./
-RUN npm install
-COPY frontend/ ./
-RUN npm run build
+RUN npm install && npm run build
 
 # Copy Nginx config
 COPY nginx.conf /etc/nginx/http.d/default.conf
 
-# Remove default server block if exists
-RUN rm -f /etc/nginx/conf.d/default.conf
-
 # Copy startup script
-COPY start.sh /app/start.sh
 RUN chmod +x /app/start.sh
 
 EXPOSE 80
