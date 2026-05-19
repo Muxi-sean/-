@@ -9,22 +9,15 @@ use think\Request;
 
 class Trade extends BaseController
 {
-    protected $esService;
-
-    public function __construct(EsTradeService $esService)
-    {
-        $this->esService = $esService;
-    }
-
     /**
      * 查询交易信息
      */
-    public function search(Request $request)
+    public function search(Request $request, EsTradeService $esService)
     {
         $params = $request->post();
 
         try {
-            $result = $this->esService->search($params);
+            $result = $esService->search($params);
             return json(['code' => 0, 'msg' => 'success', 'data' => $result]);
         } catch (\Exception $e) {
             return json(['code' => 500, 'msg' => $e->getMessage(), 'data' => null]);
